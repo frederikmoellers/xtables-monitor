@@ -10,4 +10,4 @@ Write firewall rules using jinja templates
 Check the examples directory
 
 ## How to apply rules
-Use iptables-save
+Use iptables-restore
