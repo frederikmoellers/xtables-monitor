@@ -1,0 +1,36 @@
+{# vim: set filetype=xtables-monitor: #}
+
+{# raw and nat tables only exist in IPv4 by default #}
+{% if ipv4 %}
+    *raw
+        :PREROUTING ACCEPT {{ counters["raw.PREROUTING"] }}
+        :OUTPUT ACCEPT {{ counters["raw.OUTPUT"] }}
+        COMMIT
+
+    *nat
+        :PREROUTING ACCEPT {{ counters["nat.PREROUTING"] }}
+        :POSTROUTING ACCEPT {{ counters["nat.POSTROUTING"] }}
+        :OUTPUT ACCEPT {{ counters["nat.OUTPUT"] }}
+        COMMIT
+{% endif %}
+
+*mangle
+    :PREROUTING ACCEPT {{ counters["mangle.PREROUTING"] }}
+    :INPUT ACCEPT {{ counters["mangle.INPUT"] }}
+    :FORWARD ACCEPT {{ counters["mangle.FORWARD"] }}
+    :OUTPUT ACCEPT {{ counters["mangle.OUTPUT"] }}
+    :POSTROUTING ACCEPT {{ counters["mangle.POSTROUTING"] }}
+    COMMIT
+
+{# nothing new up to here #}
+*filter
+    {# drop packages by default #}
+    :INPUT DROP {{ counters["filter.INPUT"] }}
+    :FORWARD ACCEPT {{ counters["filter.FORWARD"] }}
+    :OUTPUT ACCEPT {{ counters["filter.OUTPUT"] }}
+    {# allow connections to ports 80 and 443 #}
+    {{ counters['filter.INPUT.allow-http'] }} -A INPUT -p tcp --dport 80 -m comment --comment "XTM:allow-http" -j ACCEPT
+    {{ counters['filter.INPUT.allow-https'] }} -A INPUT -p tcp --dport 443 -m comment --comment "XTM:allow-https" -j ACCEPT
+    {# reject instead of dropping packages #}
+    {{ counters["filter.INPUT.reject"] }} -A INPUT -m comment --comment "XTM:reject" -j REJECT
+    COMMIT

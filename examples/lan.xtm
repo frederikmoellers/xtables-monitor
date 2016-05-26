@@ -1,0 +1,39 @@
+{# vim: set filetype=xtables-monitor: #}
+
+{# raw and nat tables only exist in IPv4 by default #}
+{% if ipv4 %}
+    *raw
+        :PREROUTING ACCEPT {{ counters["raw.PREROUTING"] }}
+        :OUTPUT ACCEPT {{ counters["raw.OUTPUT"] }}
+        COMMIT
+
+    *nat
+        :PREROUTING ACCEPT {{ counters["nat.PREROUTING"] }}
+        :POSTROUTING ACCEPT {{ counters["nat.POSTROUTING"] }}
+        :OUTPUT ACCEPT {{ counters["nat.OUTPUT"] }}
+        COMMIT
+{% endif %}
+
+*mangle
+    :PREROUTING ACCEPT {{ counters["mangle.PREROUTING"] }}
+    :INPUT ACCEPT {{ counters["mangle.INPUT"] }}
+    :FORWARD ACCEPT {{ counters["mangle.FORWARD"] }}
+    :OUTPUT ACCEPT {{ counters["mangle.OUTPUT"] }}
+    :POSTROUTING ACCEPT {{ counters["mangle.POSTROUTING"] }}
+    COMMIT
+
+{# nothing new up to here #}
+*filter
+    {# drop packages by default #}
+    :INPUT DROP {{ counters["filter.INPUT"] }}
+    :FORWARD ACCEPT {{ counters["filter.FORWARD"] }}
+    :OUTPUT ACCEPT {{ counters["filter.OUTPUT"] }}
+    {# allow connections from within the local network #}
+    {% for interface in interfaces | sort %}
+        {% for addr in interface.addresses %}
+            {{ counters["filter.INPUT.allow-local-" ~ interface ~ "-" ~ addr.num] }} -A INPUT -i {{ interface }} -s {{ addr }}/{{ addr.netmask }} -m comment --comment "XTM:allow-local-{{ interface }}-{{ addr.num }}" -j ACCEPT
+        {% endfor %}
+    {% endfor %}
+    {# reject instead of dropping packages #}
+    {{ counters["filter.INPUT.reject"] }} -A INPUT -m comment --comment "XTM:reject" -j REJECT
+    COMMIT
