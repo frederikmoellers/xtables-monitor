@@ -3,6 +3,7 @@ Write firewall rules using templates!
 
 ## Dependencies
 * Python >= 3.5
+* [Jinja2](http://jinja.pocoo.org/)
 * [netifaces](https://pypi.python.org/pypi/netifaces)
 * ip[6]tables-save and ip[6]tables-restore
 
