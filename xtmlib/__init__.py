@@ -2,14 +2,16 @@
 
 import sys
 
+# debug mode
 debug_mode = False
-debug_indent_c = 0
+# how many indentation levels to use for the current message
+_debug_indent_c = 0
 
 def debug(message):
-    global debug_indent_c
+    global _debug_indent_c
     if debug_mode:
-        print(("    " * debug_indent_c) + message, file = sys.stderr)
+        print(("    " * _debug_indent_c) + message, file = sys.stderr)
 
 def debug_indent(num):
-    global debug_indent_c
-    debug_indent_c += num
+    global _debug_indent_c
+    _debug_indent_c += num
