@@ -8,17 +8,12 @@ import subprocess
 import sys
 import xtmlib
 
-from xtmlib.interfaces import get_interfaces
+from xtmlib import xtables_commands
 from xtmlib.counters import get_counters
+from xtmlib.interfaces import get_interfaces
 
 # templates are searched in this directory if the path doesn't resolve otherwise
 CONFIG_DIR = pathlib.Path("/etc/xtables-monitor/")
-
-# IP protocol versions and corresponding iptables commands
-xtables_commands = {
-    4 : "iptables-restore",
-    6 : "ip6tables-restore",
-}
 
 # argument parser
 argparser = argparse.ArgumentParser(description = "Create netfilter rules from templates")
@@ -76,7 +71,7 @@ for ip_version in ip_versions:
     # if apply is set, start program
     if arguments.apply:
         xtmlib.debug("Starting iptables process")
-        process = subprocess.Popen(xtables_commands[ip_version], stdin = subprocess.PIPE, stdout = sys.stdout, stderr = sys.stderr, universal_newlines = True)
+        process = subprocess.Popen(xtables_commands[ip_version] + "-restore", stdin = subprocess.PIPE, stdout = sys.stdout, stderr = sys.stderr, universal_newlines = True)
         output = process.stdin
     else:
         output = sys.stdout

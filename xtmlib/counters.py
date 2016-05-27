@@ -5,6 +5,7 @@ import shlex
 import subprocess
 import xtmlib
 
+from xtmlib import xtables_commands
 from xtmlib.types import Counter, CounterSet
 
 COMMENT_TAG = "XTM:"
@@ -17,9 +18,9 @@ def get_counters(ip_version = 4):
     xtmlib.debug_indent(1)
     counters = CounterSet()
     try:
-        ipt_output = subprocess.check_output(["iptables-save", "-c"]).decode()
+        ipt_output = subprocess.check_output([xtables_commands[ip_version] + "-save", "-c"]).decode()
     except:
-        xtmlib.debug("Failed to call iptables_save!")
+        xtmlib.debug("Failed to call %s!" % (xtables_commands[ip_version] + "-save"))
         return counters
     table = None
     chain = None
