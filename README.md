@@ -1,5 +1,5 @@
 # xtables-monitor
-Write firewall rules using jinja templates
+Write firewall rules using templates!
 
 ## Dependencies
 * Python >= 3.5
@@ -7,13 +7,15 @@ Write firewall rules using jinja templates
 * ip[6]tables-save and ip[6]tables-restore
 
 ## How to write rules
-Check the examples directory. A more detailed documentation will follow.
+Check the examples directory. `xtables-monitor` is based on Jinja2 and uses its template mechanism. A more detailed documentation will follow.
 
 ## How to apply rules
 Use the `-a` command line switch.
 
 ## How to install
 For the moment, you can place the executable anywhere and the `xtmlib` directory either next to it or somewhere in your Python search path. Templates can either be given using paths (relative to CWD or absolute) on the command line or they can be placed in `/etc/xtables-monitor` and then be specified using their filename on the command line.
+
+If you want to have `xtables-monitor` adapt to IP address changes, place a hook in the appropriate directory in `/etc/network/`. At some point `xtables-monitor` will be able to run as a daemon and detect IP address changes itself, but until then workarounds like this are necessary.
 
 ## Example
 ``` bash
