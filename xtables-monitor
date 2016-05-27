@@ -4,6 +4,7 @@ import argparse
 import jinja2
 import os
 import pathlib
+import subprocess
 import sys
 import xtmlib
 
@@ -13,22 +14,33 @@ from xtmlib.counters import get_counters
 # templates are searched in this directory if the path doesn't resolve otherwise
 CONFIG_DIR = pathlib.Path("/etc/xtables-monitor/")
 
+# IP protocol versions and corresponding iptables commands
+xtables_commands = {
+    4 : "iptables-restore",
+    6 : "ip6tables-restore",
+}
+
 # argument parser
 argparser = argparse.ArgumentParser(description = "Create netfilter rules from templates")
 argparser.add_argument("template", help = "The template file to use for rule generation")
-argparser.add_argument("-i", "--ip-version", type = int, choices = {4, 6}, help = "Perform setup for selected IP version only (e.g. 4)", metavar = "version")
+argparser.add_argument("-a", "--apply", action = "store_true", help = "Apply the generated rules using ip[6]tables-restore. By default, rules are printed to stdout.")
+argparser.add_argument("-i", "--ip-version", type = int, choices = xtables_commands.keys(), help = "Perform setup for selected IP version only (e.g. 4)", metavar = "version")
 argparser.add_argument("-v", "--verbose", action = "store_true", help = "Show verbose output")
 arguments = argparser.parse_args()
 
+# set debug variable
 xtmlib.debug_mode = arguments.verbose
 
+# make a list of IP versions to process
 if arguments.ip_version:
     ip_versions = [arguments.ip_version,]
 else:
-    ip_versions = [4, 6]
+    ip_versions = xtables_commands.keys()
 
+# handle each IP version separately
 for ip_version in ip_versions:
     xtmlib.debug("Performing setup for IPv%d" % ip_version)
+    xtmlib.debug_indent(1)
 
     # get network interface information
     interfaces = get_interfaces(ip_version)
@@ -47,10 +59,12 @@ for ip_version in ip_versions:
             print("Template '%s' not found!" % str(template_path))
             sys.exit(1)
 
+    # setup jinja
     template_loader = jinja2.FileSystemLoader(searchpath="/")
     template_environment = jinja2.Environment(loader=template_loader)
     template = template_environment.get_template(template_path)
 
+    # setup render variables
     render_vars = { "counters" : counters, "interfaces" : interfaces }
     for ipv in ip_versions:
         if ipv == ip_version:
@@ -58,10 +72,31 @@ for ip_version in ip_versions:
         else:
             b = False
         render_vars["ipv%d" % ipv] = b
+    
+    # if apply is set, start program
+    if arguments.apply:
+        xtmlib.debug("Starting iptables process")
+        process = subprocess.Popen(xtables_commands[ip_version], stdin = subprocess.PIPE, stdout = sys.stdout, stderr = sys.stderr, universal_newlines = True)
+        output = process.stdin
+    else:
+        output = sys.stdout
 
+    # print each line
     for stmt in template.generate(render_vars):
         for line in stmt.splitlines():
+            # strip leading whitespace
             line = line.lstrip()
+            # skip empty lines
             if not line:
                 continue
-            print(line)
+            if arguments.apply:
+                xtmlib.debug(line)
+            print(line, file = output)
+
+    # if apply is set, wait for the program to finish
+    if arguments.apply:
+        stdout, stderr = process.communicate()
+        xtmlib.debug("Return code: %d" % process.returncode)
+
+    xtmlib.debug_indent(-1)
+    xtmlib.debug("Done")
