@@ -46,13 +46,16 @@ for ip_version in ip_versions:
     if template_path.is_file():
         template_path = str(template_path.resolve())
     else:
+        xtmlib.debug("Trying to find template in configuration directory")
         # try config directory
         try:
-            template_path = template_path.relative_to(CONFIG_DIR)
+            template_path = CONFIG_DIR / template_path
+            xtmlib.debug("Checking '%s'" % str(template_path))
             template_path = str(template_path.resolve())
         except:
             print("Template '%s' not found!" % str(template_path))
             sys.exit(1)
+    xtmlib.debug("Found template in '%s'" % template_path)
 
     # setup jinja
     template_loader = jinja2.FileSystemLoader(searchpath="/")
