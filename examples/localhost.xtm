@@ -30,9 +30,9 @@
     :OUTPUT ACCEPT {{ counters["filter.OUTPUT"] }}
     {# allow connections from localhost #}
     {% if ipv4 %}
-        {{ counters["filter.input.allow-localhost"] }} -A INPUT -s 127.0.0.1 -m comment --comment "XTM:allow-localhost" -j ACCEPT }}
+        {{ counters["filter.input.allow-localhost"] }} -A INPUT -s 127.0.0.1 -m comment --comment "XTM:allow-localhost" -j ACCEPT
     {% else %}
-        {{ counters["filter.input.allow-localhost"] }} -A INPUT -s ::1 -m comment --comment "XTM:allow-localhost" -j ACCEPT }}
+        {{ counters["filter.input.allow-localhost"] }} -A INPUT -s ::1 -m comment --comment "XTM:allow-localhost" -j ACCEPT
     {% endif %}
     {# allow connections from the machine itself using its IP address #}
     {% for interface in interfaces | sort %}
