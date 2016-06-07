@@ -73,8 +73,11 @@ for ip_version in ip_versions:
     
     # if apply is set, start program
     if arguments.apply:
-        xtmlib.debug("Starting iptables process")
-        process = subprocess.Popen(xtables_commands[ip_version] + "-restore", stdin = subprocess.PIPE, stdout = sys.stdout, stderr = sys.stderr, universal_newlines = True)
+        cmdline = [xtables_commands[ip_version] + "-restore", "-c"]
+        if xtmlib.debug_mode:
+            cmdline.append("-v")
+        xtmlib.debug("Starting iptables process: '%s'" % repr(cmdline))
+        process = subprocess.Popen(cmdline, stdin = subprocess.PIPE, stdout = sys.stdout, stderr = sys.stderr, universal_newlines = True)
         output = process.stdin
     else:
         output = sys.stdout
