@@ -1,6 +1,10 @@
 # xtables-monitor
 Write firewall rules using templates!
 
+You want to have a firewall on your laptop? You want to have an IPv4/6 server with a single ruleset? You don't want to grow old writing firewall rules and adapting them? Use the power of templates to solve all these problems!
+
+Using `xtables-monitor`, you can write a single set of rules for both IPv4 and IPv6 and you can effortlessly have your firewall adapt to your environment by referencing current network settings from your ruleset.
+
 ## Installation
 Run `setup.py install`. It should automatically check for (Python) dependencies and will install the package.
 Copy the examples to or create your own templates in `/etc/xtables-monitor`.
@@ -18,7 +22,7 @@ Check the examples directory. `xtables-monitor` is based on Jinja2 and uses its 
 Use the `-a` command line switch.
 
 ## How to react to IP address changes
-For the moment, you have to install hooks in `/etc/network/if-*.d` or call the execuable yourself.
+For the moment, you have to install hooks in `/etc/network/if-*.d` manually or call the execuable yourself. In a future version, `xtables-monitor` may be able to react to IP address changes automatically.
 
 ## Example
 ``` bash
