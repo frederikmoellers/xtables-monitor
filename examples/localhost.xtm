@@ -38,9 +38,9 @@
     {% for interface in interfaces | sort %}
         {% for addr in interface.addresses %}
             {% if ipv4 %}
-                {{ counters["filter.INPUT.allow-self-" ~ interface ~ "-" ~ addr.num] }} -A INPUT -s {{ addr }}/32 -m comment --comment "allow-self-{{ interface }}-{{ addr.num }}" -j ACCEPT
+                {{ counters["filter.INPUT.allow-self-" ~ interface ~ "-" ~ addr.num] }} -A INPUT -s {{ addr }}/32 -m comment --comment "XTM:allow-self-{{ interface }}-{{ addr.num }}" -j ACCEPT
             {% else %}
-                {{ counters["filter.INPUT.allow-self-" ~ interface ~ "-" ~ addr.num] }} -A INPUT -s {{ addr }}/128 -m comment --comment "allow-self-{{ interface }}-{{ addr.num }}" -j ACCEPT
+                {{ counters["filter.INPUT.allow-self-" ~ interface ~ "-" ~ addr.num] }} -A INPUT -s {{ addr }}/128 -m comment --comment "XTM:allow-self-{{ interface }}-{{ addr.num }}" -j ACCEPT
             {% endif %}
         {% endfor %}
     {% endfor %}

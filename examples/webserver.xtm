@@ -28,6 +28,8 @@
     :INPUT DROP {{ counters["filter.INPUT"] }}
     :FORWARD ACCEPT {{ counters["filter.FORWARD"] }}
     :OUTPUT ACCEPT {{ counters["filter.OUTPUT"] }}
+    {# allow packets for established connections #}
+    {{ counters['filter.INPUT.allow-established'] }} -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment "XTM:allow-established" -j ACCEPT
     {# allow connections to ports 80 and 443 #}
     {{ counters['filter.INPUT.allow-http'] }} -A INPUT -p tcp --dport 80 -m comment --comment "XTM:allow-http" -j ACCEPT
     {{ counters['filter.INPUT.allow-https'] }} -A INPUT -p tcp --dport 443 -m comment --comment "XTM:allow-https" -j ACCEPT
