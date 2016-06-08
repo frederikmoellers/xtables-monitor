@@ -1,33 +1,12 @@
 {# vim: set filetype=xtables-monitor: #}
 
-{# raw and nat tables only exist in IPv4 by default #}
-{% if ipv4 %}
-    *raw
-        :PREROUTING ACCEPT {{ counters["raw.PREROUTING"] }}
-        :OUTPUT ACCEPT {{ counters["raw.OUTPUT"] }}
-        COMMIT
+{% extends "base.xtm" %}
 
-    *nat
-        :PREROUTING ACCEPT {{ counters["nat.PREROUTING"] }}
-        :POSTROUTING ACCEPT {{ counters["nat.POSTROUTING"] }}
-        :OUTPUT ACCEPT {{ counters["nat.OUTPUT"] }}
-        COMMIT
-{% endif %}
-
-*mangle
-    :PREROUTING ACCEPT {{ counters["mangle.PREROUTING"] }}
-    :INPUT ACCEPT {{ counters["mangle.INPUT"] }}
-    :FORWARD ACCEPT {{ counters["mangle.FORWARD"] }}
-    :OUTPUT ACCEPT {{ counters["mangle.OUTPUT"] }}
-    :POSTROUTING ACCEPT {{ counters["mangle.POSTROUTING"] }}
-    COMMIT
-
-{# nothing new up to here #}
-*filter
-    {# drop packages by default #}
-    :INPUT DROP {{ counters["filter.INPUT"] }}
-    :FORWARD ACCEPT {{ counters["filter.FORWARD"] }}
-    :OUTPUT ACCEPT {{ counters["filter.OUTPUT"] }}
+{# drop packages by default #}
+{% block filter_INPUT_policy %}DROP{% endblock %}
+{% block filter_rules %}
+    {# allow packets for established connections #}
+    {{ counters['filter.INPUT.allow-established'] }} -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -m comment --comment "XTM:allow-established" -j ACCEPT
     {# allow connections from localhost #}
     {% if ipv4 %}
         {{ counters["filter.input.allow-localhost"] }} -A INPUT -s 127.0.0.1 -m comment --comment "XTM:allow-localhost" -j ACCEPT
@@ -46,4 +25,4 @@
     {% endfor %}
     {# reject instead of dropping packages #}
     {{ counters["filter.INPUT.reject"] }} -A INPUT -m comment --comment "XTM:reject" -j REJECT
-    COMMIT
+{% endblock %}

@@ -1,0 +1,75 @@
+{# vim: set filetype=xtables-monitor: #}
+
+{# raw and nat tables only exist in IPv4 by default #}
+{% if ipv4 %}
+    {% block raw %}
+        *raw
+            {% block raw_chains %}
+                {% block raw_PREROUTING %}
+                    :PREROUTING {% block raw_PREROUTING_policy %}ACCEPT{% endblock %} {{ counters["raw-PREROUTING"] }}
+                {% endblock %}
+                {% block raw_OUTPUT %}
+                    :OUTPUT {% block raw_OUTPUT_policy %}ACCEPT{% endblock %} {{ counters["raw-OUTPUT"] }}
+                {% endblock %}
+            {% endblock %}
+            {% block raw_rules %}{% endblock %}
+            COMMIT
+    {% endblock %}
+
+    {% block nat %}
+        *nat
+            {% block nat_chains %}
+                {% block nat_PREROUTING %}
+                    :PREROUTING {% block nat_PREROUTING_policy %}ACCEPT{% endblock %} {{ counters["nat-PREROUTING"] }}
+                {% endblock %}
+                {% block nat_POSTROUTING %}
+                    :POSTROUTING {% block nat_POSTROUTING_policy %}ACCEPT{% endblock %} {{ counters["nat-POSTROUTING"] }}
+                {% endblock %}
+                {% block nat_OUTPUT %}
+                    :OUTPUT {% block nat_OUTPUT_policy %}ACCEPT{% endblock %} {{ counters["nat-OUTPUT"] }}
+                {% endblock %}
+                {% block nat_rules %}{% endblock %}
+                COMMIT
+            {% endblock %}
+    {% endblock %}
+{% endif %}
+
+{% block mangle %}
+    *mangle
+        {% block mangle_chains %}
+            {% block mangle_PREROUTING %}
+                :PREROUTING {% block mangle_PREROUTING_policy %}ACCEPT{% endblock %} {{ counters["mangle-PREROUTING"] }}
+            {% endblock %}
+            {% block mangle_INPUT %}
+                :INPUT {% block mangle_INPUT_policy %}ACCEPT{% endblock %} {{ counters["mangle-INPUT"] }}
+            {% endblock %}
+            {% block mangle_FORWARD %}
+                :FORWARD {% block mangle_FORWARD_policy %}ACCEPT{% endblock %} {{ counters["mangle-FORWARD"] }}
+            {% endblock %}
+            {% block mangle_OUTPUT %}
+                :OUTPUT {% block mangle_OUTPUT_policy %}ACCEPT{% endblock %} {{ counters["mangle-OUTPUT"] }}
+            {% endblock %}
+            {% block mangle_POSTROUTING %}
+                :POSTROUTING {% block mangle_POSTROUTING_policy %}ACCEPT{% endblock %} {{ counters["mangle-POSTROUTING"] }}
+            {% endblock %}
+        {% endblock %}
+        {% block mangle_rules %}{% endblock %}
+        COMMIT
+{% endblock %}
+
+{% block filter %}
+    *filter
+        {% block filter_chains %}
+            {% block filter_INPUT %}
+                :INPUT {% block filter_INPUT_policy %}ACCEPT{% endblock %} {{ counters["filter-INPUT"] }}
+            {% endblock %}
+            {% block filter_FORWARD %}
+                :FORWARD {% block filter_FORWARD_policy %}ACCEPT{% endblock %} {{ counters["filter-FORWARD"] }}
+            {% endblock %}
+            {% block filter_OUTPUT %}
+                :OUTPUT {% block filter_OUTPUT_policy %}ACCEPT{% endblock %} {{ counters["filter-OUTPUT"] }}
+            {% endblock %}
+        {% endblock %}
+        {% block filter_rules %}{% endblock %}
+        COMMIT
+{% endblock %}
