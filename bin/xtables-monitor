@@ -4,7 +4,6 @@ import argparse
 import jinja2
 import os
 import pathlib
-import re
 import subprocess
 import sys
 import xtmlib
@@ -17,19 +16,47 @@ from xtmlib.interfaces import get_interfaces
 CONFIG_DIR = pathlib.Path("/etc/xtables-monitor/")
 
 # argument parser
-argparser = argparse.ArgumentParser(description = "Create netfilter rules from templates")
-argparser.add_argument("template", help = "The template file to use for rule generation")
-argparser.add_argument("-a", "--apply", action = "store_true", help = "Apply the generated rules using ip[6]tables-restore. By default, rules are printed to stdout.")
-argparser.add_argument("-i", "--ip-version", type = int, choices = xtables_commands.keys(), help = "Perform setup for selected IP version only (e.g. 4)", metavar = "version")
-argparser.add_argument("-v", "--verbose", action = "store_true", help = "Show verbose output")
-arguments = argparser.parse_args()
+argument_parser = argparse.ArgumentParser(
+    description="Create netfilter rules from templates"
+)
+argument_parser.add_argument(
+    "template",
+    help="The template file to use for rule generation"
+)
+argument_parser.add_argument(
+    "-a", "--apply",
+    action="store_true",
+    help="Apply the generated rules using ip[6]tables-restore. By default, "
+         "rules are printed to stdout."
+)
+argument_parser.add_argument(
+    "-i", "--ip-version",
+    type=int,
+    choices=xtables_commands.keys(),
+    help="Perform setup for selected IP version only (e.g. 4)",
+    metavar="version"
+)
+for ip_version in xtables_commands.keys():
+    argument_parser.add_argument(
+        "-{}".format(ip_version),
+        action="store_const",
+        const=ip_version,
+        help="Alias for '-i {}'".format(ip_version),
+        dest="ip_version",
+    )
+argument_parser.add_argument(
+    "-v", "--verbose",
+    action="store_true",
+    help="Show verbose output"
+)
+arguments = argument_parser.parse_args()
 
 # set debug variable
 xtmlib.debug_mode = arguments.verbose
 
 # make a list of IP versions to process
 if arguments.ip_version:
-    ip_versions = [arguments.ip_version,]
+    ip_versions = [arguments.ip_version, ]
 else:
     ip_versions = xtables_commands.keys()
 
@@ -43,12 +70,15 @@ for ip_version in ip_versions:
     counters = get_counters(ip_version)
 
     # setup jinja
-    template_loader = jinja2.FileSystemLoader([os.getcwd(), "/etc/xtables-monitor/", "/"], followlinks = True)
+    template_loader = jinja2.FileSystemLoader(
+        [os.getcwd(), "/etc/xtables-monitor/", "/"],
+        followlinks=True
+    )
     template_environment = jinja2.Environment(loader=template_loader)
     template = template_environment.get_template(arguments.template)
 
     # setup render variables
-    render_vars = { "counters" : counters, "interfaces" : interfaces }
+    render_vars = {"counters": counters, "interfaces": interfaces}
     for ipv in ip_versions:
         if ipv == ip_version:
             b = True
@@ -62,7 +92,13 @@ for ip_version in ip_versions:
         if xtmlib.debug_mode:
             cmdline.append("-v")
         xtmlib.debug("Starting iptables process: '%s'" % repr(cmdline))
-        process = subprocess.Popen(cmdline, stdin = subprocess.PIPE, stdout = sys.stdout, stderr = sys.stderr, universal_newlines = True)
+        process = subprocess.Popen(
+            cmdline,
+            stdin=subprocess.PIPE,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            universal_newlines=True
+        )
         output = process.stdin
     else:
         output = sys.stdout
@@ -77,7 +113,7 @@ for ip_version in ip_versions:
         # print line if applying rules
         if arguments.apply:
             xtmlib.debug(line)
-        print(line, file = output)
+        print(line, file=output)
 
     # if apply is set, wait for the program to finish
     if arguments.apply:

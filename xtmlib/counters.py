@@ -10,20 +10,30 @@ from xtmlib.types import Counter, CounterSet
 
 COMMENT_TAG = "XTM:"
 
-re_chain = re.compile(r':(?P<name>[^ ]+) (?P<policy>[^ ]+) \[(?P<packets_in>\d+):(?P<bytes_in>\d+)\]')
-re_rule = re.compile(r'\[(?P<packets_in>\d+):(?P<bytes_in>\d+)\] (?P<arguments>.*)')
+re_chain = re.compile(
+    r':(?P<name>[^ ]+) '
+    r'(?P<policy>[^ ]+) '
+    r'\[(?P<packets_in>\d+):(?P<bytes_in>\d+)\]'
+)
+re_rule = re.compile(
+    r'\[(?P<packets_in>\d+):(?P<bytes_in>\d+)\] (?P<arguments>.*)'
+)
 
-def get_counters(ip_version = 4):
+
+def get_counters(ip_version=4):
     xtmlib.debug("Getting counters from current setup.")
     xtmlib.debug_indent(1)
     counters = CounterSet()
     try:
-        ipt_output = subprocess.check_output([xtables_commands[ip_version] + "-save", "-c"]).decode()
-    except:
-        xtmlib.debug("Failed to call %s!" % (xtables_commands[ip_version] + "-save"))
+        ipt_output = subprocess.check_output(
+            [xtables_commands[ip_version] + "-save", "-c"]
+        ).decode()
+    except subprocess.CalledProcessError:
+        xtmlib.debug(
+            "Failed to call %s!" % (xtables_commands[ip_version] + "-save")
+        )
         return counters
     table = None
-    chain = None
 
     for line in ipt_output.splitlines():
         line = line.strip()
@@ -37,7 +47,11 @@ def get_counters(ip_version = 4):
             # chain
             match = re_chain.match(line)
             chain = match.group("name")
-            counter = Counter("%s.%s" % (table, chain), int(match.group("packets_in")), int(match.group("bytes_in")))
+            counter = Counter(
+                "%s.%s" % (table, chain),
+                int(match.group("packets_in")),
+                int(match.group("bytes_in"))
+            )
         elif line.startswith("["):
             # rule
             rule = re_rule.match(line)
@@ -45,18 +59,22 @@ def get_counters(ip_version = 4):
             comment = False
             chain = None
             for arg in args:
-                if comment == True:
+                if comment is True:
                     comment = arg
-                elif chain == True:
+                elif chain is True:
                     chain = arg
                 elif arg == "--comment":
                     comment = True
                 elif arg in {"-A", "-I", "-R"}:
                     chain = True
             if type(comment) is str and comment.startswith(COMMENT_TAG):
-                counter = Counter("%s.%s.%s" % (table, chain, comment[len(COMMENT_TAG):]), int(rule.group("packets_in")), int(rule.group("bytes_in")))
+                counter = Counter(
+                    "%s.%s.%s" % (table, chain, comment[len(COMMENT_TAG):]),
+                    int(rule.group("packets_in")),
+                    int(rule.group("bytes_in"))
+                )
         elif line == "COMMIT":
-            table = chain = None
+            table = None
             xtmlib.debug_indent(-1)
         if counter:
             xtmlib.debug("Counter '%s': %s" % (counter.name, str(counter)))

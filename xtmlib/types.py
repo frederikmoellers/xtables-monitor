@@ -2,12 +2,13 @@
 
 import socket
 
-class _Item():
+
+class _Item:
     """
     General item class.
     Supports sorting and converting to a string.
     """
-    def __init__(self, name = None):
+    def __init__(self, name=None):
         if name is None:
             name = hex(id(self))
         self.name = name
@@ -21,7 +22,8 @@ class _Item():
     def __str__(self):
         return self.name
 
-class _ItemSet():
+
+class _ItemSet:
     """
     A set of items.
     Supports element access using ["name"] and get("name")
@@ -65,17 +67,19 @@ class _ItemSet():
     def __setitem__(self, key, value):
         self._items[key] = value
 
+
 class Counter(_Item):
     """
     A packet/byte counter from iptables-save for iptables-restore
     """
-    def __init__(self, name = None, packets_in = 0, bytes_in = 0):
-        super(Counter, self).__init__(name = name)
+    def __init__(self, name=None, packets_in=0, bytes_in=0):
+        super(Counter, self).__init__(name=name)
         self.packets_in = packets_in
         self.bytes_in = bytes_in
 
     def __str__(self):
         return "[%d:%d]" % (self.packets_in, self.bytes_in)
+
 
 class CounterSet(_ItemSet):
     """
@@ -84,6 +88,7 @@ class CounterSet(_ItemSet):
     def __init__(self):
         super(CounterSet, self).__init__(Counter)
 
+
 class Address(_Item):
     """
     An IPv4/6 address
@@ -91,6 +96,7 @@ class Address(_Item):
     of a given interface
     """
     def __init__(self, addr, netmask, num, ip_version):
+        super().__init__()
         self.addr = addr
         self.netmask = netmask
         self.num = num
@@ -105,18 +111,23 @@ class Address(_Item):
             ip_family = socket.AF_INET
         else:
             ip_family = socket.AF_INET6
-        return socket.inet_pton(ip_family, self.addr) < socket.inet_pton(ip_family, other.addr)
+        return (
+            socket.inet_pton(ip_family, self.addr) <
+            socket.inet_pton(ip_family, other.addr)
+        )
 
     def __str__(self):
         return self.addr
+
 
 class Interface(_Item):
     """
     A network interface
     """
-    def __init__(self, name = None):
+    def __init__(self, name=None):
         super(Interface, self).__init__(name)
         self.addresses = []
+
 
 class InterfaceSet(_ItemSet):
     """

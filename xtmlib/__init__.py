@@ -8,14 +8,16 @@ debug_mode = False
 _debug_indent_c = 0
 
 xtables_commands = {
-    4 : "iptables",
-    6 : "ip6tables",
+    4: "iptables",
+    6: "ip6tables",
 }
+
 
 def debug(message):
     global _debug_indent_c
     if debug_mode:
-        print(("    " * _debug_indent_c) + message, file = sys.stderr)
+        print(("    " * _debug_indent_c) + message, file=sys.stderr)
+
 
 def debug_indent(num):
     global _debug_indent_c
