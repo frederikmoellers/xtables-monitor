@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="xtables-monitor",
-    version="1.0",
+    version="1.1",
     packages=find_packages(),
     install_requires=[
         "Jinja2",
