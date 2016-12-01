@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 
 import argparse
+import functools
 import jinja2
 import os
-import pathlib
+import os.path
 import subprocess
 import sys
 import xtmlib
+import xtmlib.files
 
 from xtmlib import xtables_commands
 from xtmlib.counters import get_counters
 from xtmlib.interfaces import get_interfaces
-
-# templates are searched in this directory if the path doesn't resolve otherwise
-CONFIG_DIR = pathlib.Path("/etc/xtables-monitor/")
 
 # argument parser
 argument_parser = argparse.ArgumentParser(
@@ -78,13 +77,14 @@ for ip_version in ip_versions:
     template = template_environment.get_template(arguments.template)
 
     # setup render variables
-    render_vars = {"counters": counters, "interfaces": interfaces}
+    render_vars = {"counters": counters, "interfaces": interfaces, "ip_version": ip_version}
     for ipv in ip_versions:
         if ipv == ip_version:
             b = True
         else:
             b = False
         render_vars["ipv%d" % ipv] = b
+    render_vars["ip_list"] = functools.partial(xtmlib.files.ip_list, ip_version, os.path.dirname(template.filename))
     
     # if apply is set, start program
     if arguments.apply:

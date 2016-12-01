@@ -1,0 +1,12 @@
+{# vim: set filetype=xtables-monitor: #}
+
+{% extends "base.xtm" %}
+
+{# rules #}
+{% block filter_rules %}
+    {# disallow connections to and from blacklist #}
+    {% for ip in ip_list("blacklist.list") %}
+        {{ counters["filter.INPUT.blacklist-in " ~ ip] }} -A INPUT -s {{ ip }} -m comment --comment "XTM:blacklist-in {{ ip }}" -j REJECT
+        {{ counters["filter.INPUT.blacklist-out " ~ ip] }} -A INPUT -d {{ ip }} -m comment --comment "XTM:blacklist-out {{ ip }}" -j REJECT
+    {% endfor %}
+{% endblock %}
