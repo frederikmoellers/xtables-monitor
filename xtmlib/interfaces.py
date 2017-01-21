@@ -42,7 +42,7 @@ def get_interfaces(ip_version=4):
                 addr = socket.inet_pton(socket.AF_INET, addr)
                 # from https://en.wikipedia.org/wiki/IPv4_subnetting_reference
                 if "netmask" in interface_address:
-                    netmask = interface_address["netmask"]
+                    netmask = interface_address["netmask"].partition("/")[0]
                 elif addr[0] < 128:
                     netmask = "255.0.0.0"
                 elif addr[0] < 192:
@@ -54,7 +54,7 @@ def get_interfaces(ip_version=4):
                 addr = socket.inet_ntop(socket.AF_INET, addr)
             else:
                 addr = addr.partition("%")[0]
-                netmask = interface_address["netmask"]
+                netmask = interface_address["netmask"].partition("/")[0]
             # create Address instance
             address = Address(addr, netmask, 0, ip_version)
             xtmlib.debug(
