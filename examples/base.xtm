@@ -11,6 +11,7 @@
                 {% block raw_OUTPUT %}
                     :OUTPUT {% block raw_OUTPUT_policy %}ACCEPT{% endblock %} {{ counters["raw-OUTPUT"] }}
                 {% endblock %}
+                {% block raw_additional_chains %}{% endblock %}
             {% endblock %}
             {% block raw_rules %}{% endblock %}
             COMMIT
@@ -28,9 +29,10 @@
                 {% block nat_OUTPUT %}
                     :OUTPUT {% block nat_OUTPUT_policy %}ACCEPT{% endblock %} {{ counters["nat-OUTPUT"] }}
                 {% endblock %}
-                {% block nat_rules %}{% endblock %}
-                COMMIT
+                {% block nat_additional_chains %}{% endblock %}
             {% endblock %}
+            {% block nat_rules %}{% endblock %}
+            COMMIT
     {% endblock %}
 {% endif %}
 
@@ -52,6 +54,7 @@
             {% block mangle_POSTROUTING %}
                 :POSTROUTING {% block mangle_POSTROUTING_policy %}ACCEPT{% endblock %} {{ counters["mangle-POSTROUTING"] }}
             {% endblock %}
+            {% block mangle_additional_chains %}{% endblock %}
         {% endblock %}
         {% block mangle_rules %}{% endblock %}
         COMMIT
@@ -69,6 +72,7 @@
             {% block filter_OUTPUT %}
                 :OUTPUT {% block filter_OUTPUT_policy %}ACCEPT{% endblock %} {{ counters["filter-OUTPUT"] }}
             {% endblock %}
+            {% block filter_additional_chains %}{% endblock %}
         {% endblock %}
         {% block filter_rules %}{% endblock %}
         COMMIT
