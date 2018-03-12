@@ -18,7 +18,7 @@ def get_interfaces(ip_version=4):
     for interface in netifaces.interfaces():
         interface = Interface(interface)
         # skip localhost
-        if interface == "lo":
+        if str(interface) == "lo":
             continue
         # get addresses of given family
         if ip_version == 4:
