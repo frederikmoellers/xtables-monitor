@@ -11,11 +11,11 @@ setup(
         "netifaces",
     ],
     scripts=[
-        "bin/xtables-monitor",
+        "bin/xtm",
     ],
 
     author="Frederik Möllers",
-    author_email="xtables-monitor@die-sinlosen.de",
+    author_email="frederik@die-sinlosen.de",
     description="Write firewall rules using templates",
     license="GPL3",
     url="https://github.com/frederikmoellers/xtables-monitor",
