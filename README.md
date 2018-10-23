@@ -26,7 +26,7 @@ For the moment, you have to install hooks in `/etc/network/if-*.d` manually or c
 
 ## Example
 ``` bash
-$ xtables-monitor -i 4 examples/lan.xtm
+$ xtm -i 4 examples/lan.xtm
 ```
 
 ```
